@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  postcard-processor:
+    build: .
+    volumes:
+      - ./data/input:/app/data/input
+      - ./data/output:/app/data/output
+      - ./data/processed:/app/data/processed
+    environment:
+      - INPUT_DIR=/app/data/input
+      - OUTPUT_DIR=/app/data/output
+      - PROCESSED_DIR=/app/data/processed
+      - PYTHONUNBUFFERED=1
+      - MIN_CONFIDENCE=0.5
+    restart: unless-stopped
+    # Показываем содержимое папки для отладки
+    command: >
+      sh -c "
+        echo '=== Содержимое папки input ===' &&
+        ls -la /app/data/input/ &&
+        echo '=== Запуск обработчика ===' &&
+        python -m app.main
+      "
