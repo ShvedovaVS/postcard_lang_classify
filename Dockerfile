@@ -2,7 +2,7 @@ FROM python:3.10-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Устанавливаем правильные пакеты для Debian slim
+# Базовые системные зависимости
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     tesseract-ocr-eng \
@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr-ita \
     tesseract-ocr-por \
     tesseract-ocr-nld \
+    libtesseract-dev \
     libgl1 \
     libglib2.0-0 \
     libsm6 \
@@ -25,20 +26,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Сначала копируем только requirements.txt
-COPY requirements.txt .
-
-# Устанавливаем зависимости (этот слой кешируется, если requirements.txt не менялся)
+# Базовые Python зависимости (всегда нужны)
+COPY requirements-base.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements-base.txt
 
-# Проверяем установку
-RUN python -c "import easyocr, cv2, numpy, PIL, langdetect; print('✅ All dependencies installed')"
+# Устанавливаем только базовый Tesseract (всегда)
+RUN pip install --no-cache-dir pytesseract
 
-# Копируем код (этот слой пересобирается при изменении кода)
+## Дополнительные зависимости для EasyOCR (опционально)
+#COPY requirements-easyocr.txt .
+#RUN pip install --no-cache-dir -r requirements-easyocr.txt || echo "⚠️ EasyOCR не установлен"
+#
+## Дополнительные зависимости для PaddleOCR (опционально)
+#COPY requirements-paddleocr.txt .
+#RUN pip install --no-cache-dir -r requirements-paddleocr.txt || echo "⚠️ PaddleOCR не установлен"
+
+# Дополнительные зависимости для KOSMOS (опционально)
+COPY requirements-kosmos.txt .
+RUN pip install --no-cache-dir -r requirements-kosmos.txt || echo "⚠️ KOSMOS не установлен"
+
 COPY app/ ./app/
 
-# Создаем папки
 RUN mkdir -p /app/data/{input,output,processed}
 
 CMD ["python", "-m", "app.main"]

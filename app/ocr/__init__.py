@@ -1,52 +1,87 @@
 """
-OCR Wrappers - фабрика для создания OCR движков
+OCR Wrappers - фабрика с ленивой загрузкой
 """
 
 from typing import List, Optional
 from app.config import settings
 
-# Импортируем доступные OCR движки
-from app.ocr.tesseract_wrapper import TesseractOCR
-from app.ocr.easyocr_wrapper import EasyOCRWrapper
-
-# PaddleOCR опционально
-try:
-    from app.ocr.paddleocr_wrapper import PaddleOCRWrapper
-    PADDLE_AVAILABLE = True
-except ImportError:
-    PADDLE_AVAILABLE = False
-    PaddleOCRWrapper = None
+# Храним загруженные движки в кеше
+_loaded_engines = {}
 
 
 def get_ocr_engine(engine_name: Optional[str] = None, languages: Optional[List[str]] = None):
     """
-    Фабрика для создания OCR движка
-
-    Args:
-        engine_name: 'tesseract', 'easyocr', 'paddleocr'
-        languages: список языков
-
-    Returns:
-        OCR движок
+    Фабрика для создания OCR движка с ленивой загрузкой
     """
     engine_name = engine_name or settings.OCR_ENGINE
     languages = languages or settings.OCR_LANGUAGES
 
     print(f"🔧 Создание OCR движка: {engine_name}")
 
+    # Проверяем кеш
+    cache_key = f"{engine_name}_{'_'.join(languages) if languages else ''}"
+    if cache_key in _loaded_engines:
+        print(f"✅ Используем закешированный движок: {engine_name}")
+        return _loaded_engines[cache_key]
+
+    # Ленивая загрузка
     if engine_name == 'tesseract':
-        return TesseractOCR()
+        from app.ocr.tesseract_wrapper import TesseractOCR
+        engine = TesseractOCR()
     elif engine_name == 'easyocr':
-        return EasyOCRWrapper(languages)
+        try:
+            from app.ocr.easyocr_wrapper import EasyOCRWrapper
+            engine = EasyOCRWrapper(languages)
+        except ImportError as e:
+            print(f"❌ EasyOCR не установлен. Установите: pip install easyocr")
+            print(f"   Ошибка: {e}")
+            print("⚠️ Переключаюсь на Tesseract")
+            from app.ocr.tesseract_wrapper import TesseractOCR
+            engine = TesseractOCR()
     elif engine_name == 'paddleocr':
-        if PADDLE_AVAILABLE and PaddleOCRWrapper is not None:
-            return PaddleOCRWrapper(languages)
-        else:
-            print("⚠️ PaddleOCR not available, falling back to Tesseract")
-            return TesseractOCR()
+        try:
+            from app.ocr.paddleocr_wrapper import PaddleOCRWrapper
+            engine = PaddleOCRWrapper(languages)
+        except ImportError as e:
+            print(f"❌ PaddleOCR не установлен. Установите: pip install paddlepaddle paddleocr")
+            print(f"   Ошибка: {e}")
+            print("⚠️ Переключаюсь на Tesseract")
+            from app.ocr.tesseract_wrapper import TesseractOCR
+            engine = TesseractOCR()
+    elif engine_name == 'kosmos':
+        try:
+            from app.ocr.kosmos_wrapper import KosmosOCR
+            engine = KosmosOCR()
+        except ImportError as e:
+            print(f"❌ KOSMOS не установлен. Установите: pip install torch transformers accelerate")
+            print(f"   Ошибка: {e}")
+            print("⚠️ Переключаюсь на Tesseract")
+            from app.ocr.tesseract_wrapper import TesseractOCR
+            engine = TesseractOCR()
+    elif engine_name == 'ocrspace':
+        try:
+            from app.ocr.ocrspace_wrapper import OCRSpaceWrapper
+            engine = OCRSpaceWrapper()
+        except ImportError as e:
+            print(f"❌ OCRSpace не доступен: {e}")
+            print("⚠️ Переключаюсь на Tesseract")
+            from app.ocr.tesseract_wrapper import TesseractOCR
+            engine = TesseractOCR()
     else:
-        print(f"⚠️ Unknown engine: {engine_name}, using Tesseract")
-        return TesseractOCR()
+        print(f"⚠️ Неизвестный движок: {engine_name}, использую Tesseract")
+        from app.ocr.tesseract_wrapper import TesseractOCR
+        engine = TesseractOCR()
+
+    # Сохраняем в кеш
+    _loaded_engines[cache_key] = engine
+    return engine
 
 
-__all__ = ['get_ocr_engine', 'TesseractOCR', 'EasyOCRWrapper']
+def clear_engine_cache():
+    """Очистка кеша движков (полезно при переключении)"""
+    global _loaded_engines
+    _loaded_engines = {}
+    print("🧹 Кеш движков очищен")
+
+
+__all__ = ['get_ocr_engine', 'clear_engine_cache']

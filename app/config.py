@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 from pathlib import Path
 
 
@@ -12,6 +12,7 @@ class Settings:
     PROCESSED_DIR: str = os.getenv('PROCESSED_DIR', '/app/data/processed')
 
     # 👇 ВЫБОР OCR ДВИЖКА
+    # Доступные: tesseract, easyocr, paddleocr, kosmos, ocrspace
     OCR_ENGINE: str = os.getenv('OCR_ENGINE', 'tesseract')
 
     # Языки для OCR

@@ -4,6 +4,11 @@ pillow==10.1.0
 python-dotenv==1.0.0
 langdetect==1.0.9
 
+torch>=2.0.0
+transformers>=4.30.0
+accelerate>=0.20.0
+pillow>=9.0.0
+
 # OCR движки (выберите нужные)
 pytesseract==0.3.10
 easyocr==1.7.1
