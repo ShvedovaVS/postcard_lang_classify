@@ -7,16 +7,9 @@ services:
       - ./app:/app/app
       - ./data:/app/data
     environment:
-      - OCR_ENGINE=tesseract  # Меняйте здесь
+      - OCR_ENGINE=kosmos  # Меняйте здесь
       - INPUT_DIR=/app/data/input
       - OUTPUT_DIR=/app/data/output
       - PROCESSED_DIR=/app/data/processed
       - PYTHONUNBUFFERED=1
       - MIN_CONFIDENCE=0.1
-    command: >
-      sh -c "
-        echo '=== Доступные OCR движки ===' &&
-        python scripts/check_engines.py &&
-        echo '=== Запуск обработчика ===' &&
-        python -m app.main
-      "

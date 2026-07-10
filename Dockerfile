@@ -2,7 +2,6 @@ FROM python:3.10-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Базовые системные зависимости
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     tesseract-ocr-eng \
@@ -26,28 +25,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Базовые Python зависимости (всегда нужны)
+# Только базовые зависимости
 COPY requirements-base.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements-base.txt
 
-# Устанавливаем только базовый Tesseract (всегда)
-RUN pip install --no-cache-dir pytesseract
-
-## Дополнительные зависимости для EasyOCR (опционально)
-#COPY requirements-easyocr.txt .
-#RUN pip install --no-cache-dir -r requirements-easyocr.txt || echo "⚠️ EasyOCR не установлен"
-#
-## Дополнительные зависимости для PaddleOCR (опционально)
-#COPY requirements-paddleocr.txt .
-#RUN pip install --no-cache-dir -r requirements-paddleocr.txt || echo "⚠️ PaddleOCR не установлен"
-
-# Дополнительные зависимости для KOSMOS (опционально)
-COPY requirements-kosmos.txt .
-RUN pip install --no-cache-dir -r requirements-kosmos.txt || echo "⚠️ KOSMOS не установлен"
-
 COPY app/ ./app/
+COPY entrypoint.sh /entrypoint.sh
 
-RUN mkdir -p /app/data/{input,output,processed}
+RUN chmod +x /entrypoint.sh && \
+    mkdir -p /app/data/{input,output,processed}
 
-CMD ["python", "-m", "app.main"]
+ENTRYPOINT ["/entrypoint.sh"]
