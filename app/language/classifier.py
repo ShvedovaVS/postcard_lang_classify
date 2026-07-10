@@ -10,18 +10,15 @@ DetectorFactory.seed = 0
 
 class LanguageClassifier:
     def __init__(self):
-        # Общие слова для разных языков (можно расширить)
+        # Только латинские языки
         self.language_keywords = {
             'en': ['the', 'and', 'for', 'with', 'you', 'that', 'this', 'from'],
-            'ru': ['и', 'в', 'на', 'с', 'по', 'что', 'как', 'это', 'для'],
             'fr': ['le', 'la', 'les', 'et', 'pour', 'avec', 'vous', 'que', 'dans'],
             'de': ['der', 'die', 'das', 'und', 'für', 'mit', 'den', 'von', 'zu'],
             'es': ['el', 'la', 'los', 'las', 'y', 'para', 'con', 'que', 'en'],
             'it': ['il', 'la', 'le', 'e', 'per', 'con', 'che', 'nel', 'del'],
             'pt': ['o', 'a', 'os', 'as', 'e', 'para', 'com', 'que', 'em'],
             'nl': ['de', 'het', 'een', 'en', 'voor', 'met', 'die', 'van', 'te'],
-            'pl': ['i', 'w', 'na', 'z', 'do', 'po', 'za', 'nie', 'się'],
-            'uk': ['і', 'в', 'на', 'з', 'до', 'по', 'за', 'не', 'що']
         }
 
     def classify(self, text: str) -> Dict[str, float]:
@@ -48,17 +45,13 @@ class LanguageClassifier:
         # Объединение результатов
         final_scores = {}
 
-        # Если есть результаты от langdetect
         if results:
-            # Нормализация оценок
             for lang, prob in results.items():
                 if lang in keyword_scores:
-                    # Комбинируем оценки
                     final_scores[lang] = prob * 0.7 + keyword_scores[lang] * 0.3
                 else:
                     final_scores[lang] = prob
         else:
-            # Только по ключевым словам
             for lang, score in keyword_scores.items():
                 if score > 0:
                     final_scores[lang] = score
@@ -74,9 +67,7 @@ class LanguageClassifier:
 
     def _clean_text(self, text: str) -> str:
         """Очистка текста"""
-        # Удаление специальных символов
         text = re.sub(r'[^\w\s]', ' ', text)
-        # Удаление лишних пробелов
         text = ' '.join(text.split())
         return text.lower()
 

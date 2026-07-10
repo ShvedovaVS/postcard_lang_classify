@@ -1,50 +1,44 @@
-FROM ubuntu:22.04
+FROM python:3.10-slim
 
-# Исправляем проблемы с репозиториями
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get update --fix-missing
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Устанавливаем Tesseract и Python
-RUN apt-get install -y --no-install-recommends \
+# Устанавливаем правильные пакеты для Debian slim
+RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     tesseract-ocr-eng \
-    tesseract-ocr-rus \
     tesseract-ocr-fra \
     tesseract-ocr-deu \
     tesseract-ocr-spa \
     tesseract-ocr-ita \
     tesseract-ocr-por \
     tesseract-ocr-nld \
-    tesseract-ocr-pol \
-    tesseract-ocr-ukr \
-    python3 \
-    python3-pip \
-    python3-dev \
-    libtesseract-dev \
-    libleptonica-dev \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
-    libxrender-dev \
+    libxrender1 \
     libgomp1 \
     wget \
+    ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Создаем ссылку на python3
-RUN ln -s /usr/bin/python3 /usr/bin/python
-
 WORKDIR /app
 
+# Сначала копируем только requirements.txt
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir --upgrade pip && \
-    pip3 install --no-cache-dir -r requirements.txt
 
+# Устанавливаем зависимости (этот слой кешируется, если requirements.txt не менялся)
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Проверяем установку
+RUN python -c "import easyocr, cv2, numpy, PIL, langdetect; print('✅ All dependencies installed')"
+
+# Копируем код (этот слой пересобирается при изменении кода)
 COPY app/ ./app/
-COPY scripts/ ./scripts/
 
+# Создаем папки
 RUN mkdir -p /app/data/{input,output,processed}
 
-CMD ["python3", "-m", "app.main"]
+CMD ["python", "-m", "app.main"]

@@ -1,6 +1,13 @@
 opencv-python-headless==4.8.1.78
 numpy==1.24.3
-pytesseract==0.3.10
 pillow==10.1.0
 python-dotenv==1.0.0
 langdetect==1.0.9
+
+# OCR движки (выберите нужные)
+pytesseract==0.3.10
+easyocr==1.7.1
+
+# PaddleOCR - актуальные версии
+paddlepaddle==2.6.2
+paddleocr==2.7.0.3
