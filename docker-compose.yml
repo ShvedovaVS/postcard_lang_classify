@@ -7,9 +7,9 @@ services:
       - ./app:/app/app
       - ./data:/app/data
     environment:
-      - OCR_ENGINE=trocr
-      - ENHANCE_IMAGE=false
-      - AUTO_DESKEW=false
+      - OCR_ENGINE=tessaract
+      - ENHANCE_IMAGE=true
+      - AUTO_DESKEW=true
       - TRY_ROTATIONS=false
       - MIN_CONFIDENCE=0.2
       - TROCR_MODEL=${TROCR_MODEL:-microsoft/trocr-base-handwritten}
