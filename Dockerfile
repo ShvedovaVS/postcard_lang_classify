@@ -26,12 +26,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Только базовые зависимости
-COPY requirements-base.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements-base.txt
+    pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
 COPY entrypoint.sh /entrypoint.sh
+RUN ls -la /entrypoint.sh && cat /entrypoint.sh | head -5
 
 RUN chmod +x /entrypoint.sh && \
     mkdir -p /app/data/{input,output,processed}

@@ -11,8 +11,7 @@ class Settings:
     OUTPUT_DIR: str = os.getenv('OUTPUT_DIR', '/app/data/output')
     PROCESSED_DIR: str = os.getenv('PROCESSED_DIR', '/app/data/processed')
 
-    # 👇 ВЫБОР OCR ДВИЖКА
-    # Доступные: tesseract, easyocr, paddleocr, kosmos, ocrspace
+    # Доступные: tesseract, easyocr, paddleocr, kosmos, trocr
     OCR_ENGINE: str = os.getenv('OCR_ENGINE', 'tesseract')
 
     # Языки для OCR
@@ -26,14 +25,25 @@ class Settings:
         'en', 'fr', 'de', 'es', 'it', 'pt', 'nl'
     ]
 
+    # НАСТРОЙКИ ПРЕДОБРАБОТКИ
+    # Включить/выключить улучшение качества изображения
+    ENHANCE_IMAGE: bool = os.getenv('ENHANCE_IMAGE', 'true').lower() == 'true'
+
+    # Включить/выключить автоматическое выравнивание
+    AUTO_DESKEW: bool = os.getenv('AUTO_DESKEW', 'true').lower() == 'true'
+
+    # Включить/выключить проверку поворотов
+    TRY_ROTATIONS: bool = os.getenv('TRY_ROTATIONS', 'true').lower() == 'true'
+
+    # Углы поворота для проверки
+    ROTATION_ANGLES: List[int] = [0, 90, 180, 270]
+
     # Пороги
     MIN_CONFIDENCE: float = float(os.getenv('MIN_CONFIDENCE', '0.1'))
     MIN_TEXT_LENGTH: int = 2
 
     # Обработка изображений
     MAX_IMAGE_SIZE: int = 4096
-    ROTATION_ANGLES: List[int] = [0, 90, 180, 270]
-    AUTO_DESKEW: bool = True
 
     # Настройки производительности
     MAX_WORKERS: int = 2

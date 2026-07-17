@@ -400,48 +400,6 @@ def main():
 
     processor = PostcardProcessor()
 
-    # if args.watch:
-    #     # Режим наблюдения
-    #     logger.info(f"👀 Запущен режим наблюдения (интервал: {args.check_interval}с)")
-    #     logger.info("Ожидание новых файлов... (Ctrl+C для остановки)")
-    #
-    #     processed_files = set()
-    #
-    #     while True:
-    #         try:
-    #             images = processor.get_images()
-    #             new_images = [img for img in images if img.name not in processed_files]
-    #
-    #             if new_images:
-    #                 logger.info(f"📥 Найдено {len(new_images)} новых изображений")
-    #
-    #                 for img in new_images:
-    #                     result = processor.process_single_image(img)
-    #
-    #                     # Сохраняем результаты по одному
-    #                     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    #                     result_file = processor.output_dir / f'result_{img.stem}_{timestamp}.json'
-    #                     with open(result_file, 'w', encoding='utf-8') as f:
-    #                         json.dump(result, f, ensure_ascii=False, indent=2)
-    #
-    #                     # Перемещаем файл
-    #                     dest = processor.processed_dir / img.name
-    #                     shutil.move(str(img), str(dest))
-    #                     processed_files.add(img.name)
-    #
-    #                     logger.info(f"✅ Обработан: {img.name}")
-    #
-    #             time.sleep(args.check_interval)
-    #
-    #         except KeyboardInterrupt:
-    #             logger.info("\n⏹️ Остановка режима наблюдения")
-    #             break
-    #         except Exception as e:
-    #             logger.error(f"❌ Ошибка в режиме наблюдения: {e}")
-    #             time.sleep(args.check_interval)
-    # else:
-
-    # Обычный режим - однократная обработка
     processor.process_batch(args.max_images)
 
 

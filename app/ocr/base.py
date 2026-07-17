@@ -1,3 +1,4 @@
+# app/ocr/base.py
 """
 Базовый класс для всех OCR движков
 """
@@ -7,15 +8,17 @@ import numpy as np
 
 class BaseOCR:
     """Базовый класс для OCR движков"""
-
+    
     def __init__(self):
         self.name = "base"
         self.languages = []
-
+        self.model = None  # 👈 ДОБАВЛЯЕМ
+        self.processor = None  # 👈 ДОБАВЛЯЕМ
+    
     def recognize(self, img: np.ndarray) -> Dict[str, any]:
         """
         Распознавание текста
-
+        
         Returns:
             Dict с полями:
             - text: распознанный текст
@@ -24,6 +27,10 @@ class BaseOCR:
             - word_count: количество слов
         """
         raise NotImplementedError
-
+    
     def get_supported_languages(self) -> List[str]:
         return self.languages
+    
+    def is_available(self) -> bool:
+        """Проверяет, загружен ли движок"""
+        return self.model is not None
